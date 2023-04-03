@@ -1,53 +1,74 @@
-const boardWidth = 300;
-const boardHeight = 500;
-const blockSize = 50;
+// テトリスのブロック形状を定義する
+const shapes = [	[[1, 1, 1, 1]],
 
-let gameBoard;
-let blocks = [];
+	[[1, 1],
+	 [1, 1]],
 
-function init() {
-  gameBoard = document.getElementById("game-board");
+	[[1, 1, 0],
+	 [0, 1, 1]],
 
-  document.getElementById("new-game").addEventListener("click", startNewGame);
+	[[0, 1, 1],
+	 [1, 1, 0]],
+
+	[[1, 0, 0],
+	 [1, 1, 1]],
+
+	[[0, 0, 1],
+	 [1, 1, 1]],
+
+	[[1, 1, 1],
+	 [0, 0, 1]]
+];
+
+// テトリスのブロックの色を定義する
+const colors = [	'cyan',	'blue',	'orange',	'yellow',	'green',	'purple',	'red'];
+
+// ゲームの状態を表すオブジェクトを定義する
+const state = {
+	board: [],
+	piece: {},
+	score: 0,
+	gameOver: false
+};
+
+// テトリスのブロックを描画する関数を定義する
+function render() {
+	const boardElement = document.getElementById('board');
+
+	// ボードを空のブロックで初期化する
+	boardElement.innerHTML = '';
+	state.board.forEach((row) => {
+		const rowElement = document.createElement('div');
+		rowElement.classList.add('row');
+		row.forEach((cell) => {
+			const cellElement = document.createElement('div');
+			cellElement.classList.add('cell');
+			if (cell !== 0) {
+				cellElement.style.backgroundColor = colors[cell - 1];
+			}
+			rowElement.appendChild(cellElement);
+		});
+		boardElement.appendChild(rowElement);
+	});
+
+	// 現在のテトリスのブロックを描画する
+	state.piece.shape.forEach((row, y) => {
+		row.forEach((cell, x) => {
+			if (cell !== 0) {
+				const cellElement = document.createElement('div');
+				cellElement.classList.add('cell');
+				cellElement.style.backgroundColor = colors[state.piece.color - 1];
+				cellElement.style.top = (state.piece.y + y) * 20 + 'px';
+				cellElement.style.left = (state.piece.x + x) * 20 + 'px';
+				boardElement.appendChild(cellElement);
+			}
+		});
+	});
 }
 
-function startNewGame() {
-  // clear the board
-  while (gameBoard.firstChild) {
-    gameBoard.removeChild(gameBoard.firstChild);
-  }
+// ゲームを開始する関数を定義する
+function start() {
+	// ボードを空のブロックで初期化する
+	state.board = Array.from({length: 20}, () => Array(10).fill(0));
 
-  // create the blocks
-  blocks = [
-    { width: 2, height: 2 },
-    { width: 1, height: 3 },
-    { width: 1, height: 1 },
-    { width: 3, height: 1 },
-    { width: 2, height: 1 },
-  ];
-
-  // shuffle the blocks
-  shuffle(blocks);
-
-  // place the blocks on the board
-  let x = 0;
-  let y = 0;
-  for (let i = 0; i < blocks.length; i++) {
-    let block = blocks[i];
-    let blockDiv = document.createElement("div");
-    blockDiv.className = "block";
-    blockDiv.style.width = block.width * blockSize + "px";
-    blockDiv.style.height = block.height * blockSize + "px";
-    blockDiv.style.left = x + "px";
-    blockDiv.style.top = y + "px";
-    gameBoard.appendChild(blockDiv);
-    x += block.width * blockSize;
-    if (x >= boardWidth) {
-      x = 0;
-      y += blockSize;
-    }
-  }
-}
-
-function shuffle(array) {
-  for (let i = array.length - 1;
+	// ゲームの状態を初期化する
